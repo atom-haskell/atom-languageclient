@@ -359,7 +359,7 @@ export default abstract class BaseLanguageClient {
   }
 
   protected isFileInProject(editor: TextEditor, projectPath: string): boolean {
-    return (editor.getURI() || '').startsWith(projectPath);
+    return (editor.getPath() || '').startsWith(projectPath);
   }
 
   /**

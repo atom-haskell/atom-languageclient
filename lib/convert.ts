@@ -3,7 +3,7 @@ import * as ls from './languageclient';
 import * as URL from 'url';
 import {
   Point,
-  ProjectFileEvent,
+  FilesystemChangeEvent,
   Range,
   TextEditor,
 } from 'atom';
@@ -12,6 +12,8 @@ import {
   DiagnosticType,
   TextEdit,
 } from 'atom-ide';
+
+export type ProjectFileEvent = FilesystemChangeEvent extends Array<infer T> ? T : never;
 
 // Public: Class that contains a number of helper methods for general conversions
 // between the language server protocol and Atom/Atom packages.

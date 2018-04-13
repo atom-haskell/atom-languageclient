@@ -1,9 +1,8 @@
 import * as ls from '../lib/languageclient';
-import Convert from '../lib/convert';
+import Convert, { ProjectFileEvent } from '../lib/convert';
 import { expect } from 'chai';
 import {
   Point,
-  ProjectFileEvent,
   Range,
   TextEditor,
 } from 'atom';

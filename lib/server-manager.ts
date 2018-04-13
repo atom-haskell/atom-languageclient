@@ -6,7 +6,7 @@ import { EventEmitter } from 'events';
 import { Logger } from './logger';
 import {
   CompositeDisposable,
-  ProjectFileEvent,
+  FilesystemChangeEvent,
   TextEditor,
 } from 'atom';
 
@@ -282,7 +282,7 @@ export class ServerManager {
     this.updateNormalizedProjectPaths();
   }
 
-  public projectFilesChanged(fileEvents: ProjectFileEvent[]): void {
+  public projectFilesChanged(fileEvents: FilesystemChangeEvent): void {
     if (this._activeServers.length === 0) {
       return;
     }

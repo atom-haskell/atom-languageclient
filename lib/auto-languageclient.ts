@@ -21,15 +21,12 @@ import {
   ActiveServer,
 } from './server-manager.js';
 import {
-  AutocompleteDidInsert,
-  AutocompleteProvider,
-  AutocompleteRequest,
-  AutocompleteSuggestion,
   Disposable,
   Point,
   Range,
   TextEditor,
 } from 'atom';
+import * as ac from 'atom/autocomplete-plus';
 import BaseLanguageClient from './base-languageclient';
 
 export { ActiveServer, LanguageClientConnection, LanguageServerProcess };
@@ -50,7 +47,7 @@ export default class AutoLanguageClient extends BaseLanguageClient {
   private _consoleDelegate?: atomIde.ConsoleService;
   private _linterDelegate?: linter.IndieDelegate;
   private _signatureHelpRegistry?: atomIde.SignatureHelpRegistry;
-  private _lastAutocompleteRequest?: AutocompleteRequest;
+  private _lastAutocompleteRequest?: ac.SuggestionsRequestedEvent;
   private _serverAdapters = new WeakMap<ActiveServer, ServerAdapters>();
 
   // Available if consumeBusySignal is setup
@@ -153,7 +150,7 @@ export default class AutoLanguageClient extends BaseLanguageClient {
   }
 
   // Autocomplete+ via LS completion---------------------------------------
-  public provideAutocomplete(): AutocompleteProvider {
+  public provideAutocomplete(): ac.AutocompleteProvider {
     return {
       selector: this.getGrammarScopes()
         .map((g) => g.includes('.') ? '.' + g : g)
@@ -168,8 +165,8 @@ export default class AutoLanguageClient extends BaseLanguageClient {
   }
 
   protected async getSuggestions(
-    request: AutocompleteRequest,
-  ): Promise<AutocompleteSuggestion[]> {
+    request: ac.SuggestionsRequestedEvent,
+  ): Promise<ac.AnySuggestion[]> {
     const server = await this._serverManager.getServer(request.editor);
     if (server == null || !AutocompleteAdapter.canAdapt(server.capabilities)) {
       return [];
@@ -182,7 +179,8 @@ export default class AutoLanguageClient extends BaseLanguageClient {
   }
 
   protected async getSuggestionDetailsOnSelect(
-    suggestion: AutocompleteSuggestion): Promise<AutocompleteSuggestion | null> {
+    suggestion: ac.AnySuggestion,
+  ): Promise<ac.AnySuggestion | null> {
     const request = this._lastAutocompleteRequest;
     if (request == null) { return null; }
     const server = await this._serverManager.getServer(request.editor);
@@ -195,12 +193,12 @@ export default class AutoLanguageClient extends BaseLanguageClient {
 
   protected onDidConvertAutocomplete(
     _completionItem: ls.CompletionItem,
-    _suggestion: AutocompleteSuggestion,
-    _request: AutocompleteRequest,
+    _suggestion: ac.AnySuggestion,
+    _request: ac.SuggestionsRequestedEvent,
   ): void {
   }
 
-  protected onDidInsertSuggestion(_arg: AutocompleteDidInsert): void {}
+  protected onDidInsertSuggestion(_arg: ac.SuggestionInsertedEvent): void {}
 
   // Definitions via LS documentHighlight and gotoDefinition------------
   public provideDefinitions(): atomIde.DefinitionProvider {
