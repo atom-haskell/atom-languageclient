@@ -4,11 +4,7 @@ import * as stream from 'stream';
 import * as ls from './languageclient';
 import { EventEmitter } from 'events';
 import { Logger } from './logger';
-import {
-  CompositeDisposable,
-  ProjectFileEvent,
-  TextEditor,
-} from 'atom';
+import { CompositeDisposable, ProjectFileEvent, TextEditor } from 'atom';
 
 // Public: Defines the minimum surface area for an object that resembles a
 // ChildProcess.  This is used so that language packages with alternative
@@ -39,8 +35,7 @@ interface RestartCounter {
   timerId: NodeJS.Timer;
 }
 
-export type ReportBusyWhile =
-  <T>(message: string, promiseGenerator: () => Promise<T>) => Promise<T>;
+export type ReportBusyWhile = <T>(message: string, promiseGenerator: () => Promise<T>) => Promise<T>;
 
 // Manages the language server lifecycles and their associated objects necessary
 // for adapting them to Atom IDE.
@@ -95,7 +90,7 @@ export class ServerManager {
   private async _handleTextEditor(editor: TextEditor): Promise<void> {
     if (!this._editorToServer.has(editor)) {
       // editor hasn't been processed yet, so process it by allocating LS for it if necessary
-      const server = await this.getServer(editor, {shouldStart: true});
+      const server = await this.getServer(editor, { shouldStart: true });
       if (server != null) {
         // There LS for the editor (either started now and already running)
         this._editorToServer.set(editor, server);
@@ -134,7 +129,7 @@ export class ServerManager {
 
   public async getServer(
     textEditor: TextEditor,
-    {shouldStart}: {shouldStart?: boolean} = {shouldStart: false},
+    { shouldStart }: { shouldStart?: boolean } = { shouldStart: false },
   ): Promise<ActiveServer | null> {
     const finalProjectPath = this.determineProjectPath(textEditor);
     if (finalProjectPath == null) {
@@ -214,29 +209,26 @@ export class ServerManager {
   }
 
   public async stopServer(server: ActiveServer): Promise<void> {
-    this._reportBusyWhile(
-      `Stopping ${this._languageServerName} for ${path.basename(server.projectPath)}`,
-      async () => {
-        this._logger.debug(`Server stopping "${server.projectPath}"`);
-        // Immediately remove the server to prevent further usage.
-        // If we re-open the file after this point, we'll get a new server.
-        this._activeServers.splice(this._activeServers.indexOf(server), 1);
-        this._stoppingServers.push(server);
-        server.disposable.dispose();
-        if (server.connection.isConnected) {
-          await server.connection.shutdown();
-        }
+    this._reportBusyWhile(`Stopping ${this._languageServerName} for ${path.basename(server.projectPath)}`, async () => {
+      this._logger.debug(`Server stopping "${server.projectPath}"`);
+      // Immediately remove the server to prevent further usage.
+      // If we re-open the file after this point, we'll get a new server.
+      this._activeServers.splice(this._activeServers.indexOf(server), 1);
+      this._stoppingServers.push(server);
+      server.disposable.dispose();
+      if (server.connection.isConnected) {
+        await server.connection.shutdown();
+      }
 
-        for (const [editor, mappedServer] of this._editorToServer) {
-          if (mappedServer === server) {
-            this._editorToServer.delete(editor);
-          }
+      for (const [editor, mappedServer] of this._editorToServer) {
+        if (mappedServer === server) {
+          this._editorToServer.delete(editor);
         }
+      }
 
-        this.exitServer(server);
-        this._stoppingServers.splice(this._stoppingServers.indexOf(server), 1);
-      },
-    );
+      this.exitServer(server);
+      this._stoppingServers.splice(this._stoppingServers.indexOf(server), 1);
+    });
   }
 
   public exitServer(server: ActiveServer): void {
@@ -302,7 +294,7 @@ export class ServerManager {
         }
       }
       if (changes.length > 0) {
-        activeServer.connection.didChangeWatchedFiles({changes});
+        activeServer.connection.didChangeWatchedFiles({ changes });
       }
     }
   }

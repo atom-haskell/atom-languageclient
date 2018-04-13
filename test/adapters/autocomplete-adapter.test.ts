@@ -2,21 +2,14 @@ import AutoCompleteAdapter from '../../lib/adapters/autocomplete-adapter';
 import { ActiveServer } from '../../lib/server-manager.js';
 import * as ls from '../../lib/languageclient';
 import * as sinon from 'sinon';
-import {
-  AutocompleteRequest,
-  AutocompleteSuggestion,
-  CompositeDisposable,
-  Point,
-  Range,
-  TextEditor,
-} from 'atom';
+import { AutocompleteRequest, AutocompleteSuggestion, CompositeDisposable, Point, Range, TextEditor } from 'atom';
 import { expect } from 'chai';
 import { createSpyConnection, createFakeEditor } from '../helpers.js';
 
 describe('AutoCompleteAdapter', () => {
   function createActiveServerSpy() {
     return {
-      capabilities: {completionProvider: { }},
+      capabilities: { completionProvider: {} },
       connection: new ls.LanguageClientConnection(createSpyConnection()),
       disposable: new CompositeDisposable(),
       process: undefined as any,
@@ -123,7 +116,7 @@ describe('AutoCompleteAdapter', () => {
     it('creates CompletionParams from an AutocompleteRequest with no trigger', () => {
       const result = AutoCompleteAdapter.createCompletionParams(request, '');
       expect(result.textDocument.uri).equals('file:///a/b/c/d.js');
-      expect(result.position).deep.equals({line: 123, character: 456});
+      expect(result.position).deep.equals({ line: 123, character: 456 });
       expect(result.context && result.context.triggerKind === ls.CompletionTriggerKind.Invoked);
       expect(result.context && result.context.triggerCharacter === undefined);
     });
@@ -131,7 +124,7 @@ describe('AutoCompleteAdapter', () => {
     it('creates CompletionParams from an AutocompleteRequest with a trigger', () => {
       const result = AutoCompleteAdapter.createCompletionParams(request, '.');
       expect(result.textDocument.uri).equals('file:///a/b/c/d.js');
-      expect(result.position).deep.equals({line: 123, character: 456});
+      expect(result.position).deep.equals({ line: 123, character: 456 });
       expect(result.context && result.context.triggerKind === ls.CompletionTriggerKind.TriggerCharacter);
       expect(result.context && result.context.triggerCharacter === '.');
     });
@@ -148,7 +141,7 @@ describe('AutoCompleteAdapter', () => {
     });
 
     it('converts LSP CompletionList to AutoComplete Suggestions array', () => {
-      const completionList = {items: completionItems, isIncomplete: false};
+      const completionList = { items: completionItems, isIncomplete: false };
       const autoCompleteAdapter = new AutoCompleteAdapter();
       const results = Array.from(autoCompleteAdapter.completionItemsToSuggestions(completionList, request));
       expect(results.length).equals(4);
@@ -157,14 +150,14 @@ describe('AutoCompleteAdapter', () => {
     });
 
     it('converts LSP CompletionList to AutoComplete Suggestions array using the onDidConvertCompletionItem', () => {
-      const completionList = {items: completionItems, isIncomplete: false};
+      const completionList = { items: completionItems, isIncomplete: false };
       const autoCompleteAdapter = new AutoCompleteAdapter();
-      const results =
-        Array.from(
-          autoCompleteAdapter.completionItemsToSuggestions(completionList, request, (c, a, r) => {
-            a.text = c.label + ' ok';
-            a.displayText = r.scopeDescriptor;
-          }));
+      const results = Array.from(
+        autoCompleteAdapter.completionItemsToSuggestions(completionList, request, (c, a, r) => {
+          a.text = c.label + ' ok';
+          a.displayText = r.scopeDescriptor;
+        }),
+      );
 
       expect(results.length).equals(4);
       expect(results[0][0].displayText).equals('some.scope');
@@ -188,7 +181,7 @@ describe('AutoCompleteAdapter', () => {
         detail: 'keyword',
         documentation: 'a truly useful keyword',
       };
-      const result: AutocompleteSuggestion = { };
+      const result: AutocompleteSuggestion = {};
       AutoCompleteAdapter.completionItemToSuggestion(completionItem, result, request);
       expect(result.text).equals('insert');
       expect(result.displayText).equals('label');
@@ -208,8 +201,8 @@ describe('AutoCompleteAdapter', () => {
         documentation: 'a truly useful variable',
         textEdit: {
           range: {
-            start: {line: 10, character: 20},
-            end: {line: 30, character: 40},
+            start: { line: 10, character: 20 },
+            end: { line: 30, character: 40 },
           },
           newText: 'newText',
         },
@@ -221,7 +214,7 @@ describe('AutoCompleteAdapter', () => {
         scopeDescriptor: 'some.scope',
       };
       sinon.stub(autocompleteRequest.editor, 'getTextInBufferRange').returns('replacementPrefix');
-      const result: any = { };
+      const result: any = {};
       AutoCompleteAdapter.completionItemToSuggestion(completionItem, result, autocompleteRequest);
       expect(result.displayText).equals('label');
       expect(result.type).equals('variable');
@@ -247,7 +240,7 @@ describe('AutoCompleteAdapter', () => {
         detail: 'detail',
         documentation: 'a very exciting keyword',
       };
-      const result: any = { };
+      const result: any = {};
       AutoCompleteAdapter.applyCompletionItemToSuggestion(completionItem, result);
       expect(result.text).equals('insert');
       expect(result.displayText).equals('label');
@@ -265,7 +258,7 @@ describe('AutoCompleteAdapter', () => {
         kind: ls.CompletionItemKind.Keyword,
         detail: 'detail',
       };
-      const result: any = { };
+      const result: any = {};
       AutoCompleteAdapter.applyCompletionItemToSuggestion(completionItem, result);
       expect(result.text).equals('insert');
       expect(result.displayText).equals('label');
@@ -284,7 +277,7 @@ describe('AutoCompleteAdapter', () => {
         detail: 'detail',
         documentation: { value: 'Some *markdown*', kind: 'markdown' },
       };
-      const result: any = { };
+      const result: any = {};
       AutoCompleteAdapter.applyCompletionItemToSuggestion(completionItem, result);
       expect(result.text).equals('insert');
       expect(result.displayText).equals('label');
@@ -303,7 +296,7 @@ describe('AutoCompleteAdapter', () => {
         detail: 'detail',
         documentation: { value: 'Some plain text', kind: 'plaintext' },
       };
-      const result: any = { };
+      const result: any = {};
       AutoCompleteAdapter.applyCompletionItemToSuggestion(completionItem, result);
       expect(result.text).equals('insert');
       expect(result.displayText).equals('label');
@@ -320,7 +313,7 @@ describe('AutoCompleteAdapter', () => {
         detail: 'detail',
         documentation: 'A very useful keyword',
       };
-      const result: any = { };
+      const result: any = {};
       AutoCompleteAdapter.applyCompletionItemToSuggestion(completionItem, result);
       expect(result.text).equals('label');
       expect(result.displayText).equals('label');
@@ -341,8 +334,8 @@ describe('AutoCompleteAdapter', () => {
     it('applies changes from TextEdit to replacementPrefix and text', () => {
       const textEdit = {
         range: {
-          start: {line: 1, character: 2},
-          end: {line: 3, character: 4},
+          start: { line: 1, character: 2 },
+          end: { line: 3, character: 4 },
         },
         newText: 'newText',
       };
@@ -354,8 +347,9 @@ describe('AutoCompleteAdapter', () => {
       expect(completionItem.replacementPrefix).equals('replacementPrefix');
       expect(completionItem.text).equals('newText');
       expect((editor as any).getTextInBufferRange.calledOnce).equals(true);
-      expect((editor as any).getTextInBufferRange.getCall(0).args).deep.equals(
-        [new Range(new Point(1, 2), new Point(3, 4))]);
+      expect((editor as any).getTextInBufferRange.getCall(0).args).deep.equals([
+        new Range(new Point(1, 2), new Point(3, 4)),
+      ]);
     });
   });
 

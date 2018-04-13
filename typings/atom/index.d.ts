@@ -63,13 +63,9 @@ declare module 'atom' {
 
   interface AutocompleteProvider {
     selector: string;
-    getSuggestions: (
-      request: AutocompleteRequest,
-    ) => Promise<AutocompleteSuggestion[] | null>;
+    getSuggestions: (request: AutocompleteRequest) => Promise<AutocompleteSuggestion[] | null>;
     onDidInsertSuggestion?: (arg: AutocompleteDidInsert) => void;
-    getSuggestionDetailsOnSelect: (
-      suggestion: AutocompleteSuggestion,
-    ) => Promise<AutocompleteSuggestion | null>;
+    getSuggestionDetailsOnSelect: (suggestion: AutocompleteSuggestion) => Promise<AutocompleteSuggestion | null>;
     disableForSelector?: string;
     inclusionPriority?: number;
     suggestionPriority?: number;

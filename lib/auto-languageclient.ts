@@ -16,10 +16,7 @@ import NotificationsAdapter from './adapters/notifications-adapter';
 import OutlineViewAdapter from './adapters/outline-view-adapter';
 import SignatureHelpAdapter from './adapters/signature-help-adapter';
 import { LanguageClientConnection } from './languageclient';
-import {
-  LanguageServerProcess,
-  ActiveServer,
-} from './server-manager.js';
+import { LanguageServerProcess, ActiveServer } from './server-manager.js';
 import {
   AutocompleteDidInsert,
   AutocompleteProvider,
@@ -96,13 +93,12 @@ export default class AutoLanguageClient extends BaseLanguageClient {
 
     let docSyncAdapter;
     if (DocumentSyncAdapter.canAdapt(server.capabilities)) {
-      docSyncAdapter =
-        new DocumentSyncAdapter(
-          server.connection,
-          (editor) => this.shouldSyncForEditor(editor, server.projectPath),
-          server.capabilities.textDocumentSync,
-          this.busySignalService,
-        );
+      docSyncAdapter = new DocumentSyncAdapter(
+        server.connection,
+        (editor) => this.shouldSyncForEditor(editor, server.projectPath),
+        server.capabilities.textDocumentSync,
+        this.busySignalService,
+      );
       server.disposable.add(docSyncAdapter);
     }
 
@@ -128,7 +124,10 @@ export default class AutoLanguageClient extends BaseLanguageClient {
     }
 
     this._serverAdapters.set(server, {
-      docSyncAdapter, linterPushV2, loggingConsole, signatureHelpAdapter,
+      docSyncAdapter,
+      linterPushV2,
+      loggingConsole,
+      signatureHelpAdapter,
     });
   }
 
@@ -156,7 +155,7 @@ export default class AutoLanguageClient extends BaseLanguageClient {
   public provideAutocomplete(): AutocompleteProvider {
     return {
       selector: this.getGrammarScopes()
-        .map((g) => g.includes('.') ? '.' + g : g)
+        .map((g) => (g.includes('.') ? '.' + g : g))
         .join(', '),
       inclusionPriority: 1,
       suggestionPriority: 2,
@@ -167,9 +166,7 @@ export default class AutoLanguageClient extends BaseLanguageClient {
     };
   }
 
-  protected async getSuggestions(
-    request: AutocompleteRequest,
-  ): Promise<AutocompleteSuggestion[]> {
+  protected async getSuggestions(request: AutocompleteRequest): Promise<AutocompleteSuggestion[]> {
     const server = await this._serverManager.getServer(request.editor);
     if (server == null || !AutocompleteAdapter.canAdapt(server.capabilities)) {
       return [];
@@ -177,14 +174,21 @@ export default class AutoLanguageClient extends BaseLanguageClient {
 
     this.autoComplete = this.autoComplete || new AutocompleteAdapter();
     this._lastAutocompleteRequest = request;
-    return this.autoComplete.getSuggestions(server, request, this.onDidConvertAutocomplete,
-      atom.config.get('autocomplete-plus.minimumWordLength'));
+    return this.autoComplete.getSuggestions(
+      server,
+      request,
+      this.onDidConvertAutocomplete,
+      atom.config.get('autocomplete-plus.minimumWordLength'),
+    );
   }
 
   protected async getSuggestionDetailsOnSelect(
-    suggestion: AutocompleteSuggestion): Promise<AutocompleteSuggestion | null> {
+    suggestion: AutocompleteSuggestion,
+  ): Promise<AutocompleteSuggestion | null> {
     const request = this._lastAutocompleteRequest;
-    if (request == null) { return null; }
+    if (request == null) {
+      return null;
+    }
     const server = await this._serverManager.getServer(request.editor);
     if (server == null || !AutocompleteAdapter.canResolve(server.capabilities) || this.autoComplete == null) {
       return null;
@@ -197,8 +201,7 @@ export default class AutoLanguageClient extends BaseLanguageClient {
     _completionItem: ls.CompletionItem,
     _suggestion: AutocompleteSuggestion,
     _request: AutocompleteRequest,
-  ): void {
-  }
+  ): void {}
 
   protected onDidInsertSuggestion(_arg: AutocompleteDidInsert): void {}
 
@@ -249,8 +252,8 @@ export default class AutoLanguageClient extends BaseLanguageClient {
   }
 
   // Linter push v2 API via LS publishDiagnostics
-  public consumeLinterV2(registerIndie: (params: {name: string}) => linter.IndieDelegate): void {
-    this._linterDelegate = registerIndie({name: this.name});
+  public consumeLinterV2(registerIndie: (params: { name: string }) => linter.IndieDelegate): void {
+    this._linterDelegate = registerIndie({ name: this.name });
     if (this._linterDelegate == null) {
       return;
     }
@@ -318,7 +321,7 @@ export default class AutoLanguageClient extends BaseLanguageClient {
     }
 
     // No way of detaching from client connections today
-    return new Disposable(() => { });
+    return new Disposable(() => {});
   }
 
   // Code Format via LS formatDocument & formatDocumentRange------------
@@ -403,7 +406,8 @@ export default class AutoLanguageClient extends BaseLanguageClient {
   }
 
   private getServerAdapter<T extends keyof ServerAdapters>(
-    server: ActiveServer, adapter: T,
+    server: ActiveServer,
+    adapter: T,
   ): ServerAdapters[T] | undefined {
     const adapters = this._serverAdapters.get(server);
     return adapters && adapters[adapter];

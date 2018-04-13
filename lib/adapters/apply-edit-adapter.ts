@@ -1,14 +1,7 @@
 import * as atomIde from 'atom-ide';
 import Convert from '../convert';
-import {
-  LanguageClientConnection,
-  ApplyWorkspaceEditParams,
-  ApplyWorkspaceEditResponse,
-} from '../languageclient';
-import {
-  TextBuffer,
-  TextEditor,
-} from 'atom';
+import { LanguageClientConnection, ApplyWorkspaceEditParams, ApplyWorkspaceEditResponse } from '../languageclient';
+import { TextBuffer, TextEditor } from 'atom';
 
 // Public: Adapts workspace/applyEdit commands to editors.
 export default class ApplyEditAdapter {
@@ -21,10 +14,7 @@ export default class ApplyEditAdapter {
    * Tries to apply edits and reverts if anything goes wrong.
    * Returns the checkpoint, so the caller can revert changes if needed.
    */
-  public static applyEdits(
-    buffer: TextBuffer,
-    edits: atomIde.TextEdit[],
-  ): number {
+  public static applyEdits(buffer: TextBuffer, edits: atomIde.TextEdit[]): number {
     const checkpoint = buffer.createCheckpoint();
     try {
       // Sort edits in reverse order to prevent edit conflicts.
@@ -43,7 +33,6 @@ export default class ApplyEditAdapter {
   }
 
   public static async onApplyEdit(params: ApplyWorkspaceEditParams): Promise<ApplyWorkspaceEditResponse> {
-
     let changes = params.edit.changes || {};
 
     if (params.edit.documentChanges) {
@@ -58,23 +47,21 @@ export default class ApplyEditAdapter {
     const uris = Object.keys(changes);
 
     // Keep checkpoints from all successful buffer edits
-    const checkpoints: Array<{ buffer: TextBuffer, checkpoint: number }> = [];
+    const checkpoints: Array<{ buffer: TextBuffer; checkpoint: number }> = [];
 
     const promises = uris.map(async (uri) => {
       const path = Convert.uriToPath(uri);
-      const editor = await atom.workspace.open(
-        path, {
-          searchAllPanes: true,
-          // Open new editors in the background.
-          activatePane: false,
-          activateItem: false,
-        },
-      ) as TextEditor;
+      const editor = (await atom.workspace.open(path, {
+        searchAllPanes: true,
+        // Open new editors in the background.
+        activatePane: false,
+        activateItem: false,
+      })) as TextEditor;
       const buffer = editor.getBuffer();
       // Get an existing editor for the file, or open a new one if it doesn't exist.
       const edits = Convert.convertLsTextEdits(changes[uri]);
       const checkpoint = ApplyEditAdapter.applyEdits(buffer, edits);
-      checkpoints.push({buffer, checkpoint});
+      checkpoints.push({ buffer, checkpoint });
     });
 
     // Apply all edits or fail and revert everything
@@ -85,21 +72,17 @@ export default class ApplyEditAdapter {
           description: 'Failed to apply edits.',
           detail: err.message,
         });
-        checkpoints.forEach(({buffer, checkpoint}) => {
+        checkpoints.forEach(({ buffer, checkpoint }) => {
           buffer.revertToCheckpoint(checkpoint);
         });
         return false;
       });
 
-    return {applied};
+    return { applied };
   }
 
   // Private: Do some basic sanity checking on the edit ranges.
-  private static validateEdit(
-    buffer: TextBuffer,
-    edit: atomIde.TextEdit,
-    prevEdit: atomIde.TextEdit | null,
-  ): void {
+  private static validateEdit(buffer: TextBuffer, edit: atomIde.TextEdit, prevEdit: atomIde.TextEdit | null): void {
     const path = buffer.getPath() || '';
     if (prevEdit && edit.oldRange.end.compare(prevEdit.oldRange.start) > 0) {
       throw Error(`Found overlapping edit ranges in ${path}`);

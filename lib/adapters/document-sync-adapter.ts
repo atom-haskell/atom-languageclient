@@ -11,13 +11,7 @@ import {
   DidSaveTextDocumentParams,
 } from '../languageclient';
 import ApplyEditAdapter from './apply-edit-adapter';
-import {
-  CompositeDisposable,
-  Disposable,
-  DidStopChangingEvent,
-  TextEditEvent,
-  TextEditor,
-} from 'atom';
+import { CompositeDisposable, Disposable, DidStopChangingEvent, TextEditEvent, TextEditor } from 'atom';
 import Utils from '../utils';
 import { BusySignalService } from 'atom-ide';
 
@@ -193,10 +187,7 @@ export class TextEditorSyncAdapter {
     if (documentSync.openClose !== false) {
       this._disposable.add(editor.onDidDestroy(this.didClose.bind(this)));
     }
-    this._disposable.add(
-      editor.onDidSave(this.didSave.bind(this)),
-      editor.onDidChangePath(this.didRename.bind(this)),
-    );
+    this._disposable.add(editor.onDidSave(this.didSave.bind(this)), editor.onDidChangePath(this.didRename.bind(this)));
 
     this._currentUri = this.getEditorUri();
 
@@ -240,12 +231,14 @@ export class TextEditorSyncAdapter {
   // Public: Send the entire document to the language server. This is used when
   // operating in Full (1) sync mode.
   public sendFullChanges(): void {
-    if (!this._isPrimaryAdapter()) { return; } // Multiple editors, we are not first
+    if (!this._isPrimaryAdapter()) {
+      return;
+    } // Multiple editors, we are not first
 
     this._bumpVersion();
     this._connection.didChangeTextDocument({
       textDocument: this.getVersionedTextDocumentIdentifier(),
-      contentChanges: [{text: this._editor.getText()}],
+      contentChanges: [{ text: this._editor.getText() }],
     });
   }
 
@@ -259,7 +252,9 @@ export class TextEditorSyncAdapter {
   // expects this in reverse.
   public sendIncrementalChanges(event: DidStopChangingEvent): void {
     if (event.changes.length > 0) {
-      if (!this._isPrimaryAdapter()) { return; } // Multiple editors, we are not first
+      if (!this._isPrimaryAdapter()) {
+        return;
+      } // Multiple editors, we are not first
 
       this._bumpVersion();
       this._connection.didChangeTextDocument({
@@ -295,7 +290,9 @@ export class TextEditorSyncAdapter {
 
   private _bumpVersion(): void {
     const filePath = this._editor.getPath();
-    if (filePath == null) { return; }
+    if (filePath == null) {
+      return;
+    }
     this._versions.set(filePath, this._getVersion(filePath) + 1);
   }
 
@@ -303,9 +300,13 @@ export class TextEditorSyncAdapter {
   // so it can load it in and keep track of diagnostics etc.
   private didOpen(): void {
     const filePath = this._editor.getPath();
-    if (filePath == null) { return; } // Not yet saved
+    if (filePath == null) {
+      return;
+    } // Not yet saved
 
-    if (!this._isPrimaryAdapter()) { return; } // Multiple editors, we are not first
+    if (!this._isPrimaryAdapter()) {
+      return;
+    } // Multiple editors, we are not first
 
     this._connection.didOpenTextDocument({
       textDocument: {
@@ -324,24 +325,28 @@ export class TextEditorSyncAdapter {
   // Called when the {TextEditor} is closed and sends the 'didCloseTextDocument' notification to
   // the connected language server.
   public didClose(): void {
-    if (this._editor.getPath() == null) { return; } // Not yet saved
+    if (this._editor.getPath() == null) {
+      return;
+    } // Not yet saved
 
     const fileStillOpen = atom.workspace.getTextEditors().find((t) => t.getBuffer() === this._editor.getBuffer());
     if (fileStillOpen) {
       return; // Other windows or editors still have this file open
     }
 
-    this._connection.didCloseTextDocument({textDocument: {uri: this.getEditorUri()}});
+    this._connection.didCloseTextDocument({ textDocument: { uri: this.getEditorUri() } });
   }
 
   // Called just before the {TextEditor} saves and sends the 'willSaveTextDocument' notification to
   // the connected language server.
   public willSave(): void {
-    if (!this._isPrimaryAdapter()) { return; }
+    if (!this._isPrimaryAdapter()) {
+      return;
+    }
 
     const uri = this.getEditorUri();
     this._connection.willSaveTextDocument({
-      textDocument: {uri},
+      textDocument: { uri },
       reason: TextDocumentSaveReason.Manual,
     });
   }
@@ -349,7 +354,9 @@ export class TextEditorSyncAdapter {
   // Called just before the {TextEditor} saves, sends the 'willSaveWaitUntilTextDocument' request to
   // the connected language server and waits for the response before saving the buffer.
   public async willSaveWaitUntil(): Promise<void> {
-    if (!this._isPrimaryAdapter()) { return Promise.resolve(); }
+    if (!this._isPrimaryAdapter()) {
+      return Promise.resolve();
+    }
 
     const buffer = this._editor.getBuffer();
     const uri = this.getEditorUri();
@@ -358,27 +365,26 @@ export class TextEditorSyncAdapter {
     const applyEditsOrTimeout = Utils.promiseWithTimeout(
       2500, // 2.5 seconds timeout
       this._connection.willSaveWaitUntilTextDocument({
-        textDocument: {uri},
+        textDocument: { uri },
         reason: TextDocumentSaveReason.Manual,
       }),
-    ).then((edits) => {
-      const cursor = this._editor.getCursorBufferPosition();
-      ApplyEditAdapter.applyEdits(buffer, Convert.convertLsTextEdits(edits));
-      this._editor.setCursorBufferPosition(cursor);
-    }).catch((err) => {
-      atom.notifications.addError('On-save action failed', {
-        description: `Failed to apply edits to ${title}`,
-        detail: err.message,
+    )
+      .then((edits) => {
+        const cursor = this._editor.getCursorBufferPosition();
+        ApplyEditAdapter.applyEdits(buffer, Convert.convertLsTextEdits(edits));
+        this._editor.setCursorBufferPosition(cursor);
+      })
+      .catch((err) => {
+        atom.notifications.addError('On-save action failed', {
+          description: `Failed to apply edits to ${title}`,
+          detail: err.message,
+        });
+        return;
       });
-      return;
-    });
 
     const withBusySignal =
       this._busySignalService &&
-      this._busySignalService.reportBusyWhile(
-        `Applying on-save edits for ${title}`,
-        () => applyEditsOrTimeout,
-      );
+      this._busySignalService.reportBusyWhile(`Applying on-save edits for ${title}`, () => applyEditsOrTimeout);
     return withBusySignal || applyEditsOrTimeout;
   }
 
@@ -387,11 +393,13 @@ export class TextEditorSyncAdapter {
   // Note: Right now this also sends the `didChangeWatchedFiles` notification as well but that
   // will be sent from elsewhere soon.
   public didSave(): void {
-    if (!this._isPrimaryAdapter()) { return; }
+    if (!this._isPrimaryAdapter()) {
+      return;
+    }
 
     const uri = this.getEditorUri();
     const didSaveNotification = {
-      textDocument: {uri, version: this._getVersion((uri))},
+      textDocument: { uri, version: this._getVersion(uri) },
     } as DidSaveTextDocumentParams;
     if (this._documentSync.save && this._documentSync.save.includeText) {
       didSaveNotification.text = this._editor.getText();
@@ -399,13 +407,15 @@ export class TextEditorSyncAdapter {
     this._connection.didSaveTextDocument(didSaveNotification);
     if (this._fakeDidChangeWatchedFiles) {
       this._connection.didChangeWatchedFiles({
-        changes: [{uri, type: FileChangeType.Changed}],
+        changes: [{ uri, type: FileChangeType.Changed }],
       });
     }
   }
 
   public didRename(): void {
-    if (!this._isPrimaryAdapter()) { return; }
+    if (!this._isPrimaryAdapter()) {
+      return;
+    }
 
     const oldUri = this._currentUri;
     this._currentUri = this.getEditorUri();
@@ -414,12 +424,15 @@ export class TextEditorSyncAdapter {
     }
 
     if (this._documentSync.openClose !== false) {
-      this._connection.didCloseTextDocument({textDocument: {uri: oldUri}});
+      this._connection.didCloseTextDocument({ textDocument: { uri: oldUri } });
     }
 
     if (this._fakeDidChangeWatchedFiles) {
       this._connection.didChangeWatchedFiles({
-        changes: [{uri: oldUri, type: FileChangeType.Deleted}, {uri: this._currentUri, type: FileChangeType.Created}],
+        changes: [
+          { uri: oldUri, type: FileChangeType.Deleted },
+          { uri: this._currentUri, type: FileChangeType.Created },
+        ],
       });
     }
 

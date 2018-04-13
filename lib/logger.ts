@@ -1,4 +1,4 @@
- // tslint:disable:no-console
+// tslint:disable:no-console
 
 export interface Logger {
   warn(...args: any[]): void;

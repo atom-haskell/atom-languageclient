@@ -2,21 +2,12 @@ import * as atomIde from 'atom-ide';
 import Convert from '../convert';
 import Utils from '../utils';
 import { CancellationTokenSource } from 'vscode-jsonrpc';
-import {
-  LanguageClientConnection,
-  SymbolKind,
-  ServerCapabilities,
-  SymbolInformation,
-} from '../languageclient';
-import {
-  Point,
-  TextEditor,
-} from 'atom';
+import { LanguageClientConnection, SymbolKind, ServerCapabilities, SymbolInformation } from '../languageclient';
+import { Point, TextEditor } from 'atom';
 
 // Public: Adapts the documentSymbolProvider of the language server to the Outline View
 // supplied by Atom IDE UI.
 export default class OutlineViewAdapter {
-
   private _cancellationTokens: WeakMap<LanguageClientConnection, CancellationTokenSource> = new WeakMap();
 
   // Public: Determine whether this adapter can be used to adapt a language server
@@ -40,13 +31,13 @@ export default class OutlineViewAdapter {
   // Returns a {Promise} containing the {Outline} of this document.
   public async getOutline(connection: LanguageClientConnection, editor: TextEditor): Promise<atomIde.Outline | null> {
     const results = await Utils.doWithCancellationToken(connection, this._cancellationTokens, (cancellationToken) =>
-      connection.documentSymbol({textDocument: Convert.editorToTextDocumentIdentifier(editor)}, cancellationToken),
+      connection.documentSymbol({ textDocument: Convert.editorToTextDocumentIdentifier(editor) }, cancellationToken),
     );
     results.sort(
       (a, b) =>
-        (a.location.range.start.line === b.location.range.start.line
+        a.location.range.start.line === b.location.range.start.line
           ? a.location.range.start.character - b.location.range.start.character
-          : a.location.range.start.line - b.location.range.start.line),
+          : a.location.range.start.line - b.location.range.start.line,
     );
     return {
       outlineTrees: OutlineViewAdapter.createOutlineTrees(results),

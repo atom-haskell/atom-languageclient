@@ -1,17 +1,8 @@
 import * as atomIde from 'atom-ide';
 import Convert from '../convert';
 import Utils from '../utils';
-import {
-  Hover,
-  LanguageClientConnection,
-  MarkupContent,
-  MarkedString,
-  ServerCapabilities,
-} from '../languageclient';
-import {
-  Point,
-  TextEditor,
-} from 'atom';
+import { Hover, LanguageClientConnection, MarkupContent, MarkedString, ServerCapabilities } from '../languageclient';
+import { Point, TextEditor } from 'atom';
 
 // Public: Adapts the language server protocol "textDocument/hover" to the
 // Atom IDE UI Datatip package.
@@ -59,10 +50,11 @@ export default class DatatipAdapter {
   }
 
   private static isEmptyHover(hover: Hover): boolean {
-    return hover.contents == null ||
+    return (
+      hover.contents == null ||
       (typeof hover.contents === 'string' && hover.contents.length === 0) ||
-      (Array.isArray(hover.contents) &&
-        (hover.contents.length === 0 || hover.contents[0] === ""));
+      (Array.isArray(hover.contents) && (hover.contents.length === 0 || hover.contents[0] === ''))
+    );
   }
 
   private static convertMarkedString(
@@ -83,13 +75,13 @@ export default class DatatipAdapter {
     // Must check as <{language: string}> to disambiguate between
     // string and the more explicit object type because MarkedString
     // is a union of the two types
-    if ((markedString as {language: string}).language) {
+    if ((markedString as { language: string }).language) {
       return {
         type: 'snippet',
         // TODO: find a better mapping from language -> grammar
         grammar:
-          atom.grammars.grammarForScopeName(
-            `source.${(markedString as {language: string}).language}`) || editor.getGrammar(),
+          atom.grammars.grammarForScopeName(`source.${(markedString as { language: string }).language}`) ||
+          editor.getGrammar(),
         value: markedString.value,
       };
     }

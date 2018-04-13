@@ -2,16 +2,8 @@ import * as atomIde from 'atom-ide';
 import assert = require('assert');
 import Convert from '../convert';
 import { ActiveServer } from '../server-manager';
-import {
-  CompositeDisposable,
-  Point,
-  TextEditor,
-} from 'atom';
-import {
-  LanguageClientConnection,
-  ServerCapabilities,
-  SignatureHelp,
-} from '../languageclient';
+import { CompositeDisposable, Point, TextEditor } from 'atom';
+import { LanguageClientConnection, ServerCapabilities, SignatureHelp } from '../languageclient';
 
 export default class SignatureHelpAdapter {
   private _disposables: CompositeDisposable = new CompositeDisposable();
@@ -36,7 +28,7 @@ export default class SignatureHelpAdapter {
   }
 
   public attach(register: atomIde.SignatureHelpRegistry): void {
-    const {signatureHelpProvider} = this._capabilities;
+    const { signatureHelpProvider } = this._capabilities;
     assert(signatureHelpProvider != null);
 
     let triggerCharacters: Set<string> | undefined;

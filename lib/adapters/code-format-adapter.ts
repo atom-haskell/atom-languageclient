@@ -7,10 +7,7 @@ import {
   FormattingOptions,
   ServerCapabilities,
 } from '../languageclient';
-import {
-  TextEditor,
-  Range,
-} from 'atom';
+import { TextEditor, Range } from 'atom';
 
 // Public: Adapts the language server protocol "textDocument/completion" to the
 // Atom IDE UI Code-format package.
@@ -114,10 +111,7 @@ export default class CodeFormatAdapter {
   // Returns {DocumentRangeFormattingParams} containing the identity of the text document, the
   // range of the text to be formatted as well as the options to be used in formatting the
   // document such as tab size and tabs vs spaces.
-  public static createDocumentRangeFormattingParams(
-    editor: TextEditor,
-    range: Range,
-  ): DocumentRangeFormattingParams {
+  public static createDocumentRangeFormattingParams(editor: TextEditor, range: Range): DocumentRangeFormattingParams {
     return {
       textDocument: Convert.editorToTextDocumentIdentifier(editor),
       range: Convert.atomRangeToLSRange(range),

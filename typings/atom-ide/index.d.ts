@@ -101,13 +101,13 @@ declare module 'atom-ide' {
 
   export type MarkedString =
     | {
-        type: 'markdown',
-        value: string,
+        type: 'markdown';
+        value: string;
       }
     | {
-        type: 'snippet',
-        grammar: Grammar,
-        value: string,
+        type: 'snippet';
+        grammar: Grammar;
+        value: string;
       };
 
   // This omits the React variant.
@@ -175,11 +175,7 @@ declare module 'atom-ide' {
   export interface CodeActionProvider {
     grammarScopes: string[];
     priority: number;
-    getCodeActions(
-      editor: TextEditor,
-      range: Range,
-      diagnostics: Diagnostic[],
-    ): Promise<CodeAction[] | null>;
+    getCodeActions(editor: TextEditor, range: Range, diagnostics: Diagnostic[]): Promise<CodeAction[] | null>;
   }
 
   export interface BusySignalOptions {
@@ -201,11 +197,7 @@ declare module 'atom-ide' {
     // from the provided callback.
     // The busy signal automatically deactivates when the returned promise
     // either resolves or rejects.
-    reportBusyWhile<T>(
-      title: string,
-      f: () => Promise<T>,
-      options?: BusySignalOptions,
-    ): Promise<T>;
+    reportBusyWhile<T>(title: string, f: () => Promise<T>, options?: BusySignalOptions): Promise<T>;
 
     // Activates the busy signal. Set the title in the returned BusySignal
     // object (you can update the title multiple times) and dispose it when done.
@@ -299,15 +291,7 @@ declare module 'atom-ide' {
 
   export type TaskLevelType = 'info' | 'log' | 'warning' | 'error' | 'debug' | 'success';
   export type Level = TaskLevelType | Color;
-  type Color =
-    | 'red'
-    | 'orange'
-    | 'yellow'
-    | 'green'
-    | 'blue'
-    | 'purple'
-    | 'violet'
-    | 'rainbow';
+  type Color = 'red' | 'orange' | 'yellow' | 'green' | 'blue' | 'purple' | 'violet' | 'rainbow';
 
   export type MessageKind = 'message' | 'request' | 'response';
 }

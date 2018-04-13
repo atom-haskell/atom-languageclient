@@ -1,14 +1,5 @@
-import {
-  Point,
-  TextBuffer,
-  TextEditor,
-  Range,
-  BufferScanResult,
-} from 'atom';
-import {
-  CancellationToken,
-  CancellationTokenSource,
-} from 'vscode-jsonrpc';
+import { Point, TextBuffer, TextEditor, Range, BufferScanResult } from 'atom';
+import { CancellationToken, CancellationTokenSource } from 'vscode-jsonrpc';
 
 export default class Utils {
   /**
@@ -35,12 +26,12 @@ export default class Utils {
   }
 
   private static _getRegexpRangeAtPosition(buffer: TextBuffer, position: Point, wordRegex: RegExp): Range | null {
-    const {row, column} = position;
+    const { row, column } = position;
     const rowRange = buffer.rangeForRow(row, false);
     let matchData: BufferScanResult | undefined | null;
     // Extract the expression from the row text.
     buffer.scanInRange(wordRegex, rowRange, (data) => {
-      const {range} = data;
+      const { range } = data;
       if (
         position.isGreaterThanOrEqual(range.start) &&
         // Range endpoints are exclusive.
@@ -65,8 +56,8 @@ export default class Utils {
    */
   public static cancelAndRefreshCancellationToken<T extends object>(
     key: T,
-    cancellationTokens: WeakMap<T, CancellationTokenSource>): CancellationToken {
-
+    cancellationTokens: WeakMap<T, CancellationTokenSource>,
+  ): CancellationToken {
     let cancellationToken = cancellationTokens.get(key);
     if (cancellationToken !== undefined && !cancellationToken.token.isCancellationRequested) {
       cancellationToken.cancel();
@@ -99,13 +90,15 @@ export default class Utils {
         reject(new Error(`Timeout after ${ms}ms`));
       }, ms);
 
-      promise.then((res) => {
-        clearTimeout(timer);
-        resolve(res);
-      }).catch((err) => {
-        clearTimeout(timer);
-        reject(err);
-      });
+      promise
+        .then((res) => {
+          clearTimeout(timer);
+          resolve(res);
+        })
+        .catch((err) => {
+          clearTimeout(timer);
+          reject(err);
+        });
     });
   }
 }

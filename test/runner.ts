@@ -1,4 +1,4 @@
-import { TestRunnerParams } from "atom";
+import { TestRunnerParams } from 'atom';
 import { createRunner } from 'atom-mocha-test-runner';
 
 const testRunner = createRunner(

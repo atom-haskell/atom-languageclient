@@ -5,22 +5,13 @@ import {
   ShowMessageParams,
   ShowMessageRequestParams,
 } from '../languageclient';
-import {
-  Notification,
-  NotificationButton,
-  NotificationOptions,
-  NotificationExt,
-} from 'atom';
+import { Notification, NotificationButton, NotificationOptions, NotificationExt } from 'atom';
 
 // Public: Adapts Atom's user notifications to those of the language server protocol.
 export default class NotificationsAdapter {
   // Public: Attach to a {LanguageClientConnection} to recieve events indicating
   // when user notifications should be displayed.
-  public static attach(
-    connection: LanguageClientConnection,
-    name: string,
-    projectPath: string,
-  ) {
+  public static attach(connection: LanguageClientConnection, name: string, projectPath: string) {
     connection.onShowMessage((m) => NotificationsAdapter.onShowMessage(m, name, projectPath));
     connection.onShowMessageRequest((m) => NotificationsAdapter.onShowMessageRequest(m, name, projectPath));
   }
@@ -54,10 +45,7 @@ export default class NotificationsAdapter {
         }));
       }
 
-      const notification = addNotificationForMessage(
-        params.type,
-        params.message,
-        options);
+      const notification = addNotificationForMessage(params.type, params.message, options);
 
       if (notification != null) {
         notification.onDidDismiss(() => {
@@ -74,11 +62,7 @@ export default class NotificationsAdapter {
   // * `name`   The name of the language server so the user can identify the
   //            context of the message.
   // * `projectPath`   The path of the current project.
-  public static onShowMessage(
-    params: ShowMessageParams,
-    name: string,
-    projectPath: string,
-  ): void {
+  public static onShowMessage(params: ShowMessageParams, name: string, projectPath: string): void {
     addNotificationForMessage(params.type, params.message, {
       dismissable: true,
       detail: `${name} ${projectPath}`,
@@ -91,22 +75,21 @@ export default class NotificationsAdapter {
   // * `actionItem` The {MessageActionItem} to be converted.
   //
   // Returns a {NotificationButton} equivalent to the {MessageActionItem} given.
-  public static actionItemToNotificationButton(
-    actionItem: MessageActionItem,
-  ): NotificationButton {
+  public static actionItemToNotificationButton(actionItem: MessageActionItem): NotificationButton {
     return {
       text: actionItem.title,
     };
   }
 }
 
-function messageTypeToString(
-  messageType: number,
-): string {
+function messageTypeToString(messageType: number): string {
   switch (messageType) {
-    case MessageType.Error: return 'error';
-    case MessageType.Warning: return 'warning';
-    default: return 'info';
+    case MessageType.Error:
+      return 'error';
+    case MessageType.Warning:
+      return 'warning';
+    default:
+      return 'info';
   }
 }
 
@@ -117,10 +100,10 @@ function addNotificationForMessage(
 ): Notification | null {
   function isDuplicate(note: NotificationExt): boolean {
     const noteDismissed = note.isDismissed && note.isDismissed();
-    const noteOptions = note.getOptions && note.getOptions() || {};
-    return !noteDismissed &&
-      note.getType() === messageTypeToString(messageType) &&
-      noteOptions.detail === options.detail;
+    const noteOptions = (note.getOptions && note.getOptions()) || {};
+    return (
+      !noteDismissed && note.getType() === messageTypeToString(messageType) && noteOptions.detail === options.detail
+    );
   }
   if (atom.notifications.getNotifications().some(isDuplicate)) {
     return null;

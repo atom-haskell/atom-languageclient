@@ -15,7 +15,7 @@ describe('AutoLanguageClient', () => {
       return {
         getURI: () => uri,
         getGrammar: () => {
-          return {scopeName};
+          return { scopeName };
         },
       };
     }

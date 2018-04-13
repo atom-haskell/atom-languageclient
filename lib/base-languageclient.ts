@@ -6,20 +6,9 @@ import Convert from './convert.js';
 import Utils from './utils';
 import { Socket } from 'net';
 import { LanguageClientConnection } from './languageclient';
-import {
-  ConsoleLogger,
-  NullLogger,
-  Logger,
-} from './logger';
-import {
-  LanguageServerProcess,
-  ServerManager,
-  ActiveServer,
-} from './server-manager.js';
-import {
-  CompositeDisposable,
-  TextEditor,
-} from 'atom';
+import { ConsoleLogger, NullLogger, Logger } from './logger';
+import { LanguageServerProcess, ServerManager, ActiveServer } from './server-manager.js';
+import { CompositeDisposable, TextEditor } from 'atom';
 
 export { ActiveServer, LanguageClientConnection, LanguageServerProcess };
 export type ConnectionType = 'stdio' | 'socket' | 'ipc';
@@ -236,9 +225,8 @@ export default abstract class BaseLanguageClient {
   }
 
   private async startServer(projectPath: string): Promise<ActiveServer> {
-    return this.reportBusyWhile(
-      `Starting ${this.getServerName()} for ${path.basename(projectPath)}`,
-      () => this.startServerInternal(projectPath),
+    return this.reportBusyWhile(`Starting ${this.getServerName()} for ${path.basename(projectPath)}`, () =>
+      this.startServerInternal(projectPath),
     );
   }
 
@@ -275,7 +263,10 @@ export default abstract class BaseLanguageClient {
           this.logger.warn(`Language server has exceeded auto-restart limit for project '${newServer.projectPath}'`);
           atom.notifications.addError(
             // tslint:disable-next-line:max-line-length
-            `The ${this.name} language server has exited and exceeded the restart limit for project '${newServer.projectPath}'`);
+            `The ${this.name} language server has exited and exceeded the restart limit for project '${
+              newServer.projectPath
+            }'`,
+          );
         }
       }
     });
@@ -290,7 +281,8 @@ export default abstract class BaseLanguageClient {
               settings: mappedConfig,
             });
           }
-        }));
+        }),
+      );
     }
 
     this.startExclusiveAdapters(newServer);
@@ -376,6 +368,9 @@ export default abstract class BaseLanguageClient {
    * @param stderr a chunk of stderr from a language server instance
    */
   private handleServerStderr(stderr: string, _projectPath: string) {
-    stderr.split('\n').filter((l) => l).forEach((line) => this.logger.warn(`stderr ${line}`));
+    stderr
+      .split('\n')
+      .filter((l) => l)
+      .forEach((line) => this.logger.warn(`stderr ${line}`));
   }
 }
