@@ -747,10 +747,11 @@ export abstract class AutoLanguageClient {
     return new Disposable(() => delete this.busySignalService);
   }
 
-  public consumeIdeHaskellUPI(service: UPI.IUPIRegistration) {
+  public consumeIdeHaskellUPI(service: UPI.IUPIRegistration): Disposable {
     this.upiInstance = service({
       name: this.getServerName()
     });
+    return this.upiInstance;
   }
 
   /**
