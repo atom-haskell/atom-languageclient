@@ -40,6 +40,7 @@ import {
   TextEditor,
 } from 'atom';
 import * as ac from 'atom/autocomplete-plus';
+import * as UPI from 'atom-haskell-upi';
 
 export { ActiveServer, LanguageClientConnection, LanguageServerProcess };
 export type ConnectionType = 'stdio' | 'socket' | 'ipc';
@@ -54,7 +55,8 @@ export interface ServerAdapters {
 // Atom-IDE services wired up entirely for you by just subclassing it and
 // implementing startServerProcess/getGrammarScopes/getLanguageName and
 // getServerName.
-export default class AutoLanguageClient {
+export abstract class AutoLanguageClient {
+  private upiInstance?: UPI.IUPIInstance;
   private _disposable!: CompositeDisposable;
   private _serverManager!: ServerManager;
   private _consoleDelegate?: atomIde.ConsoleService;
@@ -83,24 +85,16 @@ export default class AutoLanguageClient {
   // -------------------------------------------------------------------------
 
   // Return an array of the grammar scopes you handle, e.g. [ 'source.js' ]
-  protected getGrammarScopes(): string[] {
-    throw Error('Must implement getGrammarScopes when extending AutoLanguageClient');
-  }
+  protected abstract getGrammarScopes(): string[];
 
   // Return the name of the language you support, e.g. 'JavaScript'
-  protected getLanguageName(): string {
-    throw Error('Must implement getLanguageName when extending AutoLanguageClient');
-  }
+  protected abstract getLanguageName(): string;
 
   // Return the name of your server, e.g. 'Eclipse JDT'
-  protected getServerName(): string {
-    throw Error('Must implement getServerName when extending AutoLanguageClient');
-  }
+  protected abstract getServerName(): string;
 
   // Start your server process
-  protected startServerProcess(projectPath: string): LanguageServerProcess | Promise<LanguageServerProcess> {
-    throw Error('Must override startServerProcess to start language server process when extending AutoLanguageClient');
-  }
+  protected abstract startServerProcess(projectPath: string): LanguageServerProcess | Promise<LanguageServerProcess>;
 
   // You might want to override these for different behavior
   // ---------------------------------------------------------------------------
@@ -751,6 +745,12 @@ export default class AutoLanguageClient {
   public consumeBusySignal(service: atomIde.BusySignalService): Disposable {
     this.busySignalService = service;
     return new Disposable(() => delete this.busySignalService);
+  }
+
+  public consumeIdeHaskellUPI(service: UPI.IUPIRegistration) {
+    this.upiInstance = service({
+      name: this.getServerName()
+    });
   }
 
   /**
