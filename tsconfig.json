@@ -38,5 +38,6 @@
         "typings/**/*.ts",
         "lib/**/*.ts",
         "test/**/*.ts"
-    ]
+    ],
+    "compileOnSave": true
 }
